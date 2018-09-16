@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.3.xsd">
+
+	<int:gateway default-request-channel="gatewayInputChannel" service-interface="com.banking.Interface.PrinterGateway">
+	</int:gateway>
+	<int:channel id="inputChannel"></int:channel>
+	<int:channel id="gatewayInputChannel">
+		<int:queue capacity="10" />
+	</int:channel>
+	<int:channel id="outputChannel"></int:channel>
+	
+	<bean id="printService" class="com.banking.service.PrintService"></bean>
+	
+	<int:service-activator ref="printService" method="print" input-channel="inputChannel" output-channel="outputChannel">
+	</int:service-activator>
+	
+	<int:service-activator ref="printService" method="print" input-channel="gatewayInputChannel" output-channel="outputChannel">
+		<int:poller fixed-rate="5" time-unit="SECONDS" max-messages-per-poll="2"></int:poller>
+	</int:service-activator>
+
+</beans>
